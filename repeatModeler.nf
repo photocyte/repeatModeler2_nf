@@ -1,11 +1,13 @@
 
-Channel.fromPath(params.genome).into{ genome_fasta_ch1 ; genome_fasta_ch2 ; genome_fasta_ch3 ; genome_fasta_ch4 }
+Channel.fromPath(params.genome).set{ genome_fasta_ch1 }
 
 process RepeatModeler_BuildDatabase {
+  cache 'deep'
   publishDir "results/db_dir"
   input:
      file fasta from genome_fasta_ch1
   output:
+     file "${genome_fasta_ch1}" into cached_genome
      file "*.translation" into db_translate_ch
      file "*.n*" into db_blastdb_ch
   tag "$fasta"
@@ -20,9 +22,11 @@ process RepeatModeler_BuildDatabase {
   """
 }
 
+cached_genome.into{ genome_fasta_ch2 ; genome_fasta_ch3 ; genome_fasta_ch4 }
+
 process RepeatModeler_execute {
   executor 'lsf'
-  publishDir "results/rm_out"
+  publishDir "results/rm_out",mode:"copy"
 //  stageInMode 'copy'
 //  memory '180 GB'
 //  scratch 'ram-disk'
@@ -33,9 +37,9 @@ process RepeatModeler_execute {
      file db_blastdb from db_blastdb_ch
   tag "$db_translate"
   output:
-     file "RM_*"
+     //file "RM_*"
      file "*-families.fa" into repeat_library_ch
-     file "*-families.stk"     
+     file "*-families.stk" into repeat_msa_ch    
   script:
   """
   ##From database  
@@ -62,7 +66,7 @@ script:
 }
 
 process convert_out_to_gff3 {
-publishDir "repeatModeler_nextflow_results", mode:"copy"
+publishDir "results", mode:"copy"
 conda "/lab/solexa_weng/testtube/miniconda3/envs/repeatmasker/"
 input:
  file rm_out from rm_out_chunk.collectFile(keepHeader:true,skip:3,name:"combined_repeat_masker.outs")
@@ -77,7 +81,7 @@ cat tmp.gff | gt gff3 -tidy -sort -retainids > ${genome}.repeats.gff3
 }
 
 process soft_mask {
-publishDir "repeatModeler_nextflow_results", mode:"copy"
+publishDir "results", mode:"copy"
 input:
  file repeats_gff from repeats_gff_ch
  file genome from genome_fasta_ch4
@@ -87,5 +91,17 @@ script:
 """
 bedtools maskfasta -soft -fi ${genome} -bed ${repeats_gff} -fo softmasked.${genome}
 """
+}
 
+process convert_stockholm_to_fasta {
+publishDir "results", mode:"copy"
+input:
+ file msaFile from repeat_msa_ch
+output:
+ file "${msaFile}.msa.fa"
+conda "hmmer"
+script:
+"""
+esl-reformat --informat stockholm -o ${msaFile}.msa.fa fasta ${msaFile}
+"""
 }
