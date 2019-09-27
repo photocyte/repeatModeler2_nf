@@ -1,4 +1,5 @@
 
+
 Channel.fromPath(params.genome).set{ genome_fasta_ch1 }
 
 process RepeatModeler_BuildDatabase {
@@ -7,7 +8,7 @@ process RepeatModeler_BuildDatabase {
   input:
      file fasta from genome_fasta_ch1
   output:
-     file "${genome_fasta_ch1}" into cached_genome
+     file "${fasta}" into cached_genome
      file "*.translation" into db_translate_ch
      file "*.n*" into db_blastdb_ch
   tag "$fasta"
@@ -19,6 +20,7 @@ process RepeatModeler_BuildDatabase {
   THENAME=\${THENAME%.fa}
   THENAME=\${THENAME%.fna}
   BuildDatabase -name \$THENAME -engine ncbi $fasta
+  sleep 10 ##Filesystem latency issues
   """
 }
 
@@ -36,7 +38,8 @@ process RepeatModeler_execute {
      file db_blastdb from db_blastdb_ch
   tag "$db_translate"
   output:
-     //file "RM_*"
+     //file "RM_*" //I don't think we need these temporary files.
+     file "unaligned.fa" optional true
      file "*-families.fa" into repeat_library_ch
      file "*-families.stk" into repeat_msa_ch    
   script:
@@ -45,11 +48,25 @@ process RepeatModeler_execute {
   THENAME=\$(basename ${db_translate})
   THENAME=\${THENAME%.translation}
   RepeatModeler -engine ncbi -pa ${task.cpus} -database \$THENAME
+  sleep 10 ##Filesystem latency issues
   """
 }
 
-genome_fasta_ch2.splitFasta( by: 10 ).set{ genome_fasta_split }
-genome_fasta_split.combine(repeat_library_ch).set{ repeat_masker_tuples }
+process splitLibraryFasta {
+conda "ucsc-fasplit"
+input:
+ file(inputFasta) from repeat_library_ch
+output:
+ file("split/*.fa") into library_fasta_split
+script:
+"""
+mkdir split
+faSplit about ${inputFasta} 100000 split/
+sleep 10 ##Filesystem latency issues
+"""
+}
+
+genome_fasta_ch2.combine(library_fasta_split).set { repeat_masker_tuples }
 
 process RepeatMasker_parallel_execute {
 cpus 4
@@ -60,6 +77,7 @@ output:
 script:
 """
  RepeatMasker -pa ${task.cpus} -gff -qq -lib ${repeat_library} ${genome_chunk}
+ sleep 10 ##Filesystem latency issues
 """
 }
 
@@ -75,6 +93,7 @@ script:
 """
 /lab/solexa_weng/testtube/miniconda3/envs/repeatmasker/share/RepeatMasker/util/rmOutToGFF3.pl ${rm_out} > tmp.gff
 cat tmp.gff | gt gff3 -tidy -sort -retainids > ${genome}.repeats.gff3
+sleep 10 ##Filesystem latency issues
 """
 }
 
@@ -88,6 +107,7 @@ output:
 script:
 """
 bedtools maskfasta -soft -fi ${genome} -bed ${repeats_gff} -fo softmasked.${genome}
+sleep 10 ##Filesystem latency issues
 """
 }
 
@@ -101,5 +121,6 @@ conda "hmmer"
 script:
 """
 esl-reformat --informat stockholm -o ${msaFile}.msa.fa fasta ${msaFile}
+sleep 10 ##Filesystem latency issues
 """
 }
