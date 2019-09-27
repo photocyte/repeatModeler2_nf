@@ -25,7 +25,6 @@ process RepeatModeler_BuildDatabase {
 cached_genome.into{ genome_fasta_ch2 ; genome_fasta_ch3 ; genome_fasta_ch4 }
 
 process RepeatModeler_execute {
-  executor 'lsf'
   publishDir "results/rm_out",mode:"copy"
 //  stageInMode 'copy'
 //  memory '180 GB'
@@ -53,7 +52,6 @@ genome_fasta_ch2.splitFasta( by: 10 ).set{ genome_fasta_split }
 genome_fasta_split.combine(repeat_library_ch).set{ repeat_masker_tuples }
 
 process RepeatMasker_parallel_execute {
-executor 'lsf'
 cpus 4
 input:
  set file(genome_chunk), file(repeat_library) from repeat_masker_tuples
