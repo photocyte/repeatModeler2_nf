@@ -1,5 +1,3 @@
-
-
 Channel.fromPath(params.genome).set{ genome_fasta_ch1 }
 
 process RepeatModeler_BuildDatabase {
@@ -19,6 +17,10 @@ process RepeatModeler_BuildDatabase {
   THENAME=\${THENAME%.fasta}
   THENAME=\${THENAME%.fa}
   THENAME=\${THENAME%.fna}
+  ##Put the path and/or version into the stdout
+  which BuildDatabase
+  BuildDatabase -h
+  ##
   BuildDatabase -name \$THENAME -engine ncbi $fasta
   sleep 10 ##Filesystem latency issues
   """
@@ -47,6 +49,10 @@ process RepeatModeler_execute {
   ##From database  
   THENAME=\$(basename ${db_translate})
   THENAME=\${THENAME%.translation}
+  ##Put the path and/or version into the stdout
+  which RepeatModeler
+  RepeatModeler -v
+  ##
   RepeatModeler -engine ncbi -pa ${task.cpus} -database \$THENAME
   sleep 10 ##Filesystem latency issues
   """
@@ -66,7 +72,7 @@ sleep 10 ##Filesystem latency issues
 """
 }
 
-genome_fasta_ch2.combine(library_fasta_split).set { repeat_masker_tuples }
+genome_fasta_ch2.combine(library_fasta_split.flatten()).set { repeat_masker_tuples }
 
 process RepeatMasker_parallel_execute {
 cpus 4
@@ -76,6 +82,10 @@ output:
  file "*.out" into rm_out_chunk
 script:
 """
+  ##Put the path and/or version into the stdout
+  which RepeatMasker
+  RepeatMasker -v
+  ##
  RepeatMasker -pa ${task.cpus} -gff -qq -lib ${repeat_library} ${genome_chunk}
  sleep 10 ##Filesystem latency issues
 """
@@ -92,7 +102,7 @@ output:
 script:
 """
 /lab/solexa_weng/testtube/miniconda3/envs/repeatmasker/share/RepeatMasker/util/rmOutToGFF3.pl ${rm_out} > tmp.gff
-cat tmp.gff | gt gff3 -tidy -sort -retainids > ${genome}.repeats.gff3
+cat tmp.gff | grep -vP "^#" | gt gff3 -tidy -sort -retainids | uniq > ${genome}.repeats.gff3
 sleep 10 ##Filesystem latency issues
 """
 }
@@ -111,15 +121,40 @@ sleep 10 ##Filesystem latency issues
 """
 }
 
+process rename_stockholm_record_ids {
+input:
+ file msaFile from repeat_msa_ch 
+output:
+ file "renamed.${msaFile}" into renamed_stockholm
+script:
+"""
+#!/usr/bin/env python
+import re
+import os
+wf = open('renamed.${msaFile}','w')
+with open('${msaFile}','r') as rf:
+    i=0
+    for l in rf.readlines():
+        m = re.search('.+:[0-9]+-[0-9]+.+',l)
+        if m == None:
+             wf.write(l)
+        else:
+             prefix = str(i)+"_"
+             wf.write(prefix+m.group(0)+os.linesep)
+        i+=1
+wf.close()
+"""
+}
+
 process convert_stockholm_to_fasta {
 publishDir "results", mode:"copy"
 input:
- file msaFile from repeat_msa_ch
+ file msaFile from renamed_stockholm
 output:
  file "${msaFile}.msa.fa"
 conda "hmmer"
 script:
-"""
+"""    
 esl-reformat --informat stockholm -o ${msaFile}.msa.fa fasta ${msaFile}
 sleep 10 ##Filesystem latency issues
 """
