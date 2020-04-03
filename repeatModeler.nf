@@ -17,7 +17,7 @@ process RepeatModeler_BuildDatabase {
   THENAME=\${THENAME%.fasta}
   THENAME=\${THENAME%.fa}
   THENAME=\${THENAME%.fna}
-  ##Put the path and/or version into the stdout
+  ##Print the path and/or version into the stdout
   which BuildDatabase
   BuildDatabase -h
   ##
@@ -49,7 +49,7 @@ process RepeatModeler_execute {
   ##From database  
   THENAME=\$(basename ${db_translate})
   THENAME=\${THENAME%.translation}
-  ##Put the path and/or version into the stdout
+  ##Print the path and/or version into the stdout
   which RepeatModeler
   RepeatModeler -v
   ##
@@ -82,7 +82,7 @@ output:
  file "*.out" into rm_out_chunk
 script:
 """
-  ##Put the path and/or version into the stdout
+  ##Print the path and/or version into the stdout
   which RepeatMasker
   RepeatMasker -v
   ##
