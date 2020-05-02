@@ -229,7 +229,7 @@ workflow modelAndMaskGenome_wf {
 
   splitLibraryFasta(RepeatModeler_modelRepeatLibrary.out.repeat_library_ch)
     
-  repeat_masker_tuples = cached_genome.combine(splitLibraryFasta.out.flatten())
+  repeat_masker_tuples = cached_genome.combine(splitLibraryFasta.out)
   RepeatMasker_parallel_exec(repeat_masker_tuples)
 
   RepeatMasker_simple_exec(cached_genome)
