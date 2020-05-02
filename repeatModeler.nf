@@ -1,14 +1,14 @@
-Channel.fromPath(params.genome).set{ genome_fasta_ch1 }
+nextflow.preview.dsl=2
 
 process checksum_input {
 executor 'local'
 conda 'seqkit openssl coreutils'
 publishDir "results",pattern:"input*.checksum.txt",mode:"copy",overwrite:"true"
 input:
- file genome from genome_fasta_ch1
+ path genome
 output:
- tuple env(FASCHK),file("*-*-*-*__${genome}") into checksummed_genome_ch
- file "input.*.checksum.txt"
+ tuple env(FASCHK),path("*-*-*-*__${genome}"), emit:checksum_and_genome
+ path "input.*.checksum.txt"
 tag "${genome}"
 shell:
 '''
@@ -27,13 +27,11 @@ echo "faschk:${FASCHK}__${f}" > input.${f}.checksum.txt
 process RepeatModeler_BuildDatabase {
   cache 'deep'
   publishDir "results/db_dir"
-//  conda "repeatmodeler"
   input:
-     tuple val(faschk),file(fasta) from checksummed_genome_ch
+     path(fasta)
   output:
-     file "${fasta}" into cached_genome
-     file "*.translation" into db_translate_ch
-     file "*.n*" into db_blastdb_ch
+     path "*.translation"
+     path "*.n*"
   tag "$fasta"
   script:
   """
@@ -51,25 +49,22 @@ process RepeatModeler_BuildDatabase {
   """
 }
 
-cached_genome.into{ genome_fasta_ch2 ; genome_fasta_ch3 ; genome_fasta_ch4 ; genome_fasta_ch5 }
-
-process RepeatModeler_execute {
+process RepeatModeler_modelRepeatLibrary {
   storeDir "results/RepeatModeler_out"
-//  conda "repeatmodeler"
 //  stageInMode 'copy'
 //  memory '180 GB'
 //  scratch 'ram-disk'
   cpus 18
   queue '18'
   input:
-     file db_translate from db_translate_ch
-     file db_blastdb from db_blastdb_ch
+     path db_translate
+     path db_blastdb
   tag "$db_translate"
   output:
-     //file "RM_*" //I don't think we need these temporary files.
-     file "unaligned.fa" optional true
-     file "*-families.fa" into repeat_library_ch
-     file "*-families.stk" into repeat_msa_ch    
+     //path "RM_*" //I don't think we need these temporary files.
+     path "*-families.fa", emit: repeat_library_ch
+     path "*-families.stk", emit: repeat_msa_ch    
+     path "unaligned.fa" optional true
   script:
   """
   ##From database  
@@ -90,9 +85,9 @@ process RepeatModeler_execute {
 process splitLibraryFasta {
 conda "ucsc-fasplit"
 input:
- file(inputFasta) from repeat_library_ch
+ path(inputFasta)
 output:
- file("split/*.fa") into library_fasta_split
+ path "split/*.fa", emit: library_fasta_split
 script:
 """
 mkdir split
@@ -101,15 +96,14 @@ sleep 10 ##Helps with rare filesystem latency issues
 """
 }
 
-genome_fasta_ch2.combine(library_fasta_split.flatten()).set { repeat_masker_tuples }
 
 process RepeatMasker_parallel_exec {
 cpus 4
 // conda "repeatmodeler"
 input:
- set file(genome), file(repeat_lib_chunk) from repeat_masker_tuples
+ tuple path(genome), path(repeat_lib_chunk)
 output:
- file "*.out" into rm_chunk_out
+ path "*.out"
 tag "${repeat_lib_chunk}, ${genome.baseName}"
 script:
 """
@@ -125,9 +119,9 @@ script:
 process RepeatMasker_simple_exec {
 cpus 8
 input:
- file genome from genome_fasta_ch5
+ path genome
 output: 
- file "*.out" into rm_simple_out
+ path "*.out", emit: rm_simple_out
 tag "$genome"
 script:
 """
@@ -135,14 +129,12 @@ RepeatMasker -noint -pa ${task.cpus} -gff -q ${genome}
 """
 }
 
-rm_simple_out.mix(rm_chunk_out).set{rm_outs}
-
 process convert_out_to_gff {
 // conda "repeatmodeler"
 input:
- file rm_out from rm_outs.collectFile(keepHeader:true,skip:3,name:"combined_repeat_masker.outs")
+ path rm_out
 output:
- file "tmp.gff" into repeats_gff_tmp_ch
+ path "tmp.gff", emit: repeats_gff_tmp_ch
 script:
 """
 #conda list > conda-env.txt
@@ -154,12 +146,13 @@ process tidy_to_gff3 {
 storeDir "results"
 conda "genometools-genometools"
 input:
- file "tmp.gff" from repeats_gff_tmp_ch
- file genome from genome_fasta_ch3
+ path genome
+ path "tmp.gff"
 output:
- file "${genome}.repeats.gff3.gz" into repeats_gff_ch
+ path "${genome}.repeats.gff3.gz", emit: repeats_gff_ch
 script:
 """
+set -o pipefail
 conda list > conda-env.txt
 cat tmp.gff | grep -vP "^#" | gt gff3 -tidy -sort -retainids | uniq | gzip > ${genome}.repeats.gff3.gz
 """
@@ -170,12 +163,13 @@ storeDir "results"
 conda "bedtools seqkit"
 tag "${genome}"
 input:
- file repeats_gff from repeats_gff_ch
- file genome from genome_fasta_ch4
+ path genome
+ path repeats_gff
 output:
-  file "softmasked.${genome}"
+  path "softmasked.${genome}"
 script:
 """
+set -o pipefail
 bedtools maskfasta -soft -fi <(seqkit seq -u ${genome}) -bed ${repeats_gff} -fo softmasked.${genome}
 sleep 10 ##Helps with rare filesystem latency issues
 """
@@ -183,9 +177,9 @@ sleep 10 ##Helps with rare filesystem latency issues
 
 process rename_stockholm_record_ids {
 input:
- file msaFile from repeat_msa_ch 
+ path msaFile
 output:
- file "renamed.${msaFile}" into renamed_stockholm
+ path "renamed.${msaFile}", emit: renamed_stockholm
 shell:
 '''
 #!/usr/bin/env python
@@ -211,13 +205,40 @@ wf.close()
 process convert_stockholm_to_fasta {
 publishDir "results", mode:"copy"
 input:
- file msaFile from renamed_stockholm
+ path msaFile
 output:
- file "${msaFile}.msa.fa"
+ path "${msaFile}.msa.fa"
 conda "hmmer"
 script:
 """    
 esl-reformat --informat stockholm -o ${msaFile}.msa.fa fasta ${msaFile}
 sleep 10 ##Helps with rare filesystem latency issues
 """
+}
+
+workflow modelAndMaskGenome_wf {
+ take: genome
+ main:
+  checksum_input(genome)
+  checksum_input.out.checksum_and_genome.map{ it[1] }.set{cached_genome}
+  RepeatModeler_BuildDatabase(cached_genome)
+  
+  RepeatModeler_modelRepeatLibrary(RepeatModeler_BuildDatabase.out)
+  rename_stockholm_record_ids(RepeatModeler_modelRepeatLibrary.out.repeat_msa_ch)
+  convert_stockholm_to_fasta(rename_stockholm_record_ids.out.renamed_stockholm)
+
+  splitLibraryFasta(RepeatModeler_modelRepeatLibrary.out.repeat_library_ch)
+    
+  repeat_masker_tuples = cached_genome.combine(splitLibraryFasta.out.flatten())
+  RepeatMasker_parallel_exec(repeat_masker_tuples)
+
+  RepeatMasker_simple_exec(cached_genome)
+  mergedOuts = RepeatMasker_simple_exec.out.mix(RepeatMasker_parallel_exec.out).collectFile(keepHeader:true,skip:3,name:"combined_repeat_masker.outs")
+  convert_out_to_gff(mergedOuts)
+  tidy_to_gff3(cached_genome,convert_out_to_gff.out)
+  soft_mask(cached_genome,tidy_to_gff3.out)
+}
+
+workflow {
+ modelAndMaskGenome_wf(Channel.fromPath(params.genome))
 }
