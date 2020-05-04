@@ -65,13 +65,13 @@
 <text text-anchor="middle" x="926.08" y="-599.4" font-family="Times,serif" font-size="14.00">cached_genome</text>
 </g>
 <!-- p14 -->
-<g id="node13" class="node">
+<g id="node14" class="node">
 <title>p14</title>
 <ellipse fill="none" stroke="black" cx="210.08" cy="-559.6" rx="3.5" ry="3.5"/>
 <text text-anchor="middle" x="182.58" y="-566.9" font-family="Times,serif" font-size="14.00">combine</text>
 </g>
 <!-- p3&#45;&gt;p14 -->
-<g id="edge13" class="edge">
+<g id="edge15" class="edge">
 <title>p3&#45;&gt;p14</title>
 <path fill="none" stroke="black" d="M734.53,-631.04C712.08,-629.99 587.66,-623.77 487.08,-610.6 384.77,-597.2 262.79,-571.89 223.19,-563.43"/>
 <polygon fill="black" stroke="black" points="223.87,-560 213.35,-561.32 222.39,-566.84 223.87,-560"/>
@@ -203,6 +203,17 @@
 <path fill="none" stroke="black" d="M1457.08,-273.4C1457.08,-256.52 1457.08,-231.26 1457.08,-216.82"/>
 <polygon fill="black" stroke="black" points="1460.58,-216.68 1457.08,-206.68 1453.58,-216.68 1460.58,-216.68"/>
 </g>
+<!-- p12 -->
+<g id="node13" class="node">
+<title>p12</title>
+<ellipse fill="black" stroke="black" cx="198.08" cy="-632.2" rx="3.6" ry="3.6"/>
+</g>
+<!-- p12&#45;&gt;p14 -->
+<g id="edge13" class="edge">
+<title>p12&#45;&gt;p14</title>
+<path fill="none" stroke="black" d="M198.54,-628.52C200.05,-619.61 204.99,-590.58 207.89,-573.49"/>
+<polygon fill="black" stroke="black" points="211.4,-573.73 209.62,-563.28 204.5,-572.56 211.4,-573.73"/>
+</g>
 <!-- p15 -->
 <g id="node16" class="node">
 <title>p15</title>
@@ -216,24 +227,13 @@
 <polygon fill="black" stroke="black" points="178.15,-478.56 183.46,-469.39 173.59,-473.26 178.15,-478.56"/>
 <text text-anchor="middle" x="226.58" y="-501.9" font-family="Times,serif" font-size="14.00">repeat_masker_tuples</text>
 </g>
-<!-- p12 -->
-<g id="node14" class="node">
-<title>p12</title>
-<ellipse fill="black" stroke="black" cx="198.08" cy="-632.2" rx="3.6" ry="3.6"/>
-</g>
-<!-- p12&#45;&gt;p14 -->
-<g id="edge14" class="edge">
-<title>p12&#45;&gt;p14</title>
-<path fill="none" stroke="black" d="M198.54,-628.52C200.05,-619.61 204.99,-590.58 207.89,-573.49"/>
-<polygon fill="black" stroke="black" points="211.4,-573.73 209.62,-563.28 204.5,-572.56 211.4,-573.73"/>
-</g>
 <!-- p13 -->
 <g id="node15" class="node">
 <title>p13</title>
 <ellipse fill="black" stroke="black" cx="223.08" cy="-632.2" rx="3.6" ry="3.6"/>
 </g>
 <!-- p13&#45;&gt;p14 -->
-<g id="edge15" class="edge">
+<g id="edge14" class="edge">
 <title>p13&#45;&gt;p14</title>
 <path fill="none" stroke="black" d="M222.59,-628.52C220.95,-619.61 215.6,-590.58 212.45,-573.49"/>
 <polygon fill="black" stroke="black" points="215.83,-572.48 210.57,-563.28 208.94,-573.75 215.83,-572.48"/>

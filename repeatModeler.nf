@@ -50,7 +50,7 @@ process RepeatModeler_BuildDatabase {
 }
 
 process RepeatModeler_modelRepeatLibrary {
-  storeDir "results/RepeatModeler_out"
+  //storeDir "results/RepeatModeler_out"
 //  stageInMode 'copy'
 //  memory '180 GB'
 //  scratch 'ram-disk'
@@ -143,7 +143,7 @@ rmOutToGFF3.pl ${rm_out} > tmp.gff
 }
 
 process tidy_to_gff3 {
-storeDir "results"
+//storeDir "results"
 conda "genometools-genometools"
 input:
  path genome
@@ -159,7 +159,7 @@ cat tmp.gff | grep -vP "^#" | gt gff3 -tidy -sort -retainids | uniq | gzip > ${g
 }
 
 process soft_mask {
-storeDir "results"
+//storeDir "results"
 conda "bedtools seqkit"
 tag "${genome}"
 input:
