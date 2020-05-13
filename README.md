@@ -6,16 +6,20 @@ Dependencies:
 * Nextflow
 * Miniconda
 
-If you have set the '--genome' parameter, and have access to Miniconda / Singularity, and given the path to your tandem repeat finder (TRF) executable under the 'runOptions' in nextflow.config, this pipeline should 'just work' and automatically pull necesarry containers and install software via conda.
+If you have set the '--genome' parameter, and have access to [Miniconda](https://docs.conda.io/en/latest/miniconda.html) & [Singularity](https://sylabs.io/singularity/), and given the path to your [tandem repeat finder](https://tandem.bu.edu/trf/trf.html) (TRF) executable under the 'runOptions' in nextflow.config, this pipeline should 'just work' and automatically pull the necessary [Docker containers](https://hub.docker.com/r/dfam/tetools) and install software via conda.
 
-Run:
-'nextflow run repeatModeler.nf -resume --genome example.fa'
+See here for more background on the dfam/tetools container: [https://github.com/Dfam-consortium/TETools](https://github.com/Dfam-consortium/TETools)
 
-Results:
- 
+### Running the pipeline
+`nextflow run repeatModeler.nf -resume --genome example.fa`
 
-RepeatModeler2 citation:
+### Results
+ Look in `./results` once the pipeline is complete
+
+### RepeatModeler2 citation
 Flynn JM, Hubley R, Goubert C, Rosen J, Clark AG, Feschotte C, Smit AF. 2020. RepeatModeler2 for automated genomic discovery of transposable element families. PNAS. doi:10.1073/pnas.1921046117
 
-DAG:
+###DAG
+(Note, DAG rendering is a little broken currently)
+
 ![Directed acyclic graph for program execution](./results/dag.svg)
