@@ -240,5 +240,16 @@ workflow modelAndMaskGenome_wf {
 }
 
 workflow {
+ log.info """\
+ R E P E A T M O D E L E R 2 - N F
+ ===================================
+ genome        : ${params.genome}
+
+ If you have set the --genome parameter, and
+ have access to Miniconda / Singularity,
+ and given the path to your tandem repeat finder
+ (TRF) executable under the 'runOptions' in 
+ nextflow.config, this should just work.
+ """
  modelAndMaskGenome_wf(Channel.fromPath(params.genome))
 }
