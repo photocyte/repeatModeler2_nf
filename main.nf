@@ -136,6 +136,7 @@ input:
  path rm_out
 output:
  path "tmp.gff", emit: repeats_gff_tmp_ch
+tag "${rm_out}"
 shell:
 '''
 #conda list > conda-env.txt
@@ -152,6 +153,7 @@ input:
  path "tmp.gff"
 output:
  path "${genome}.repeats.gff3.gz", emit: repeats_gff_ch
+tag "${genome}.repeats.gff3.gz"
 shell:
 '''
 set -o pipefail
@@ -184,6 +186,7 @@ input:
  path msaFile
 output:
  path "renamed.${msaFile}", emit: renamed_stockholm
+tag "${msaFile}"
 shell:
 '''
 #!/usr/bin/env python
@@ -214,6 +217,7 @@ input:
 output:
  path "${msaFile}.msa.fa"
 conda "hmmer"
+tag "${msaFile}"
 shell:
 '''   
 esl-reformat --informat stockholm -o !{msaFile}.msa.fa fasta !{msaFile}
