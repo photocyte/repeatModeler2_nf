@@ -33,20 +33,20 @@ process RepeatModeler_BuildDatabase {
      path "*.translation"
      path "*.n*"
   tag "$fasta"
-  script:
-  """
+  shell
+  '''
   ##From database  
-  THENAME=\$(basename ${fasta})
-  THENAME=\${THENAME%.fasta}
-  THENAME=\${THENAME%.fa}
-  THENAME=\${THENAME%.fna}
+  THENAME=$(basename ${fasta})
+  THENAME=${THENAME%.fasta}
+  THENAME=${THENAME%.fa}
+  THENAME=${THENAME%.fna}
   ##Print the path and/or version into the stdout
   ##conda list > conda-env.txt
   which BuildDatabase
   ##
-  BuildDatabase -name \$THENAME -engine ncbi $fasta
+  BuildDatabase -name $THENAME -engine ncbi !{fasta}
   sleep 10 ##Helps with rare filesystem latency issues
-  """
+  '''
 }
 
 process RepeatModeler_modelRepeatLibrary {
@@ -65,18 +65,18 @@ process RepeatModeler_modelRepeatLibrary {
      path "*-families.fa", emit: repeat_library_ch
      path "*-families.stk", emit: repeat_msa_ch    
      path "unaligned.fa" optional true
-  script:
-  """
+  shell:
+  '''
   ##From database  
-  THENAME=\$(basename ${db_translate})
-  THENAME=\${THENAME%.translation}
+  THENAME=$(basename !{db_translate})
+  THENAME=${THENAME%.translation}
   ##Print the path and/or version into the stdout
   ##conda list > conda-env.txt
   which RepeatModeler
   ##
-  RepeatModeler -engine ncbi -pa ${task.cpus} -LTRStruct -database \$THENAME 
+  RepeatModeler -engine ncbi -pa !{task.cpus} -LTRStruct -database \$THENAME 
   sleep 10 ##Helps with rare filesystem latency issues
-  """
+  '''
 }
 
 //Prefer to split this in a process, rather than the built-in "splitFasta" operator as
@@ -88,12 +88,12 @@ input:
  path(inputFasta)
 output:
  path "split/*.fa", emit: library_fasta_split
-script:
-"""
+shell:
+'''
 mkdir split
-faSplit about ${inputFasta} 20000 split/
+faSplit about !{inputFasta} 20000 split/
 sleep 10 ##Helps with rare filesystem latency issues
-"""
+'''
 }
 
 
@@ -105,15 +105,15 @@ input:
 output:
  path "*.out"
 tag "${repeat_lib_chunk}, ${genome.baseName}"
-script:
-"""
+shell:
+'''
   ##Print the path and/or version into the stdout
   ##conda list > conda-env.txt
   which RepeatMasker
   RepeatMasker -v
   ##
-  RepeatMasker -nolow -no_is -norna -pa ${task.cpus} -gff -q -lib ${repeat_lib_chunk} ${genome}
-"""
+  RepeatMasker -nolow -no_is -norna -pa !{task.cpus} -gff -q -lib !{repeat_lib_chunk} !{genome}
+'''
 }
 
 process RepeatMasker_simple_exec {
@@ -135,11 +135,11 @@ input:
  path rm_out
 output:
  path "tmp.gff", emit: repeats_gff_tmp_ch
-script:
-"""
+shell:
+'''
 #conda list > conda-env.txt
-rmOutToGFF3.pl ${rm_out} > tmp.gff
-"""
+rmOutToGFF3.pl !{rm_out} > tmp.gff
+'''
 }
 
 process tidy_to_gff3 {
@@ -150,12 +150,12 @@ input:
  path "tmp.gff"
 output:
  path "${genome}.repeats.gff3.gz", emit: repeats_gff_ch
-script:
-"""
+shell
+'''
 set -o pipefail
 conda list > conda-env.txt
-cat tmp.gff | grep -vP "^#" | gt gff3 -tidy -sort -retainids | uniq | gzip > ${genome}.repeats.gff3.gz
-"""
+cat tmp.gff | grep -vP "^#" | gt gff3 -tidy -sort -retainids | uniq | gzip > !{genome}.repeats.gff3.gz
+'''
 }
 
 process soft_mask {
@@ -167,10 +167,10 @@ input:
  path repeats_gff
 output:
   path "softmasked.${genome}"
-script:
+shell:
 """
 set -o pipefail
-bedtools maskfasta -soft -fi <(seqkit seq -u ${genome}) -bed ${repeats_gff} -fo softmasked.${genome}
+bedtools maskfasta -soft -fi <(seqkit seq -u !{genome}) -bed !{repeats_gff} -fo softmasked.!{genome}
 sleep 10 ##Helps with rare filesystem latency issues
 """
 }
@@ -209,11 +209,11 @@ input:
 output:
  path "${msaFile}.msa.fa"
 conda "hmmer"
-script:
-"""    
-esl-reformat --informat stockholm -o ${msaFile}.msa.fa fasta ${msaFile}
+shell
+'''   
+esl-reformat --informat stockholm -o !{msaFile}.msa.fa fasta !{msaFile}
 sleep 10 ##Helps with rare filesystem latency issues
-"""
+'''
 }
 
 workflow modelAndMaskGenome_wf {
