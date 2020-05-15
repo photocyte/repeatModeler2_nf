@@ -33,7 +33,7 @@ process RepeatModeler_BuildDatabase {
      path "*.translation"
      path "*.n*"
   tag "$fasta"
-  shell
+  shell:
   '''
   ##From database  
   THENAME=$(basename !{fasta})
