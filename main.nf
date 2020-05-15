@@ -251,7 +251,7 @@ workflow {
  finder (TRF) executable under the 'runOptions' 
  in nextflow.config, this should just work.
 
- Intermeidate results are stored in the
+ Intermediate results are stored in the
  'work' directory, in the current working dir
 
  The pipeline will publish results to the
