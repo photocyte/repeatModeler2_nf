@@ -28,7 +28,7 @@ process RepeatModeler_BuildDatabase {
   cache 'deep'
   publishDir "results/db_dir"
   input:
-     path(fasta)
+     path fasta
   output:
      path "*.translation"
      path "*.n*"
