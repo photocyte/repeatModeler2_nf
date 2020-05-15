@@ -54,7 +54,7 @@ process RepeatModeler_modelRepeatLibrary {
 //  stageInMode 'copy'
 //  memory '180 GB'
 //  scratch 'ram-disk'
-  cpus 1
+  cpus params.cpuNum
   //queue '18'
   input:
      path db_translate
@@ -98,7 +98,7 @@ sleep 10 ##Helps with rare filesystem latency issues
 
 
 process RepeatMasker_parallel_exec {
-cpus 1
+cpus params.cpuNum
 // conda "repeatmodeler"
 input:
  tuple path(genome), path(repeat_lib_chunk)
@@ -117,7 +117,7 @@ shell:
 }
 
 process RepeatMasker_simple_exec {
-cpus 1
+cpus params.cpuNum
 input:
  path genome
 output: 
