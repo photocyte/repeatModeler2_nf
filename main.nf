@@ -241,15 +241,18 @@ workflow modelAndMaskGenome_wf {
 
 workflow {
  log.info """\
- R E P E A T M O D E L E R 2 - N F
- ===================================
+ R E P E A T M O D E L E R 2 - N E X T F L O W
+ =============================================
  genome        : ${params.genome}
 
  If you have set the --genome parameter, and
  have access to Miniconda / Singularity,
- and given the path to your tandem repeat finder
- (TRF) executable under the 'runOptions' in 
- nextflow.config, this should just work.
+ and given the path to your tandem repeat 
+ finder (TRF) executable under the 'runOptions' 
+ in nextflow.config, this should just work.
+
+ The pipeline will publish results to the
+ 'results' dir, in the current working dir
  """
  modelAndMaskGenome_wf(Channel.fromPath(params.genome))
 }
