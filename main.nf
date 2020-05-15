@@ -152,7 +152,7 @@ input:
  path "tmp.gff"
 output:
  path "${genome}.repeats.gff3.gz", emit: repeats_gff_ch
-shell
+shell:
 '''
 set -o pipefail
 conda list > conda-env.txt
@@ -214,7 +214,7 @@ input:
 output:
  path "${msaFile}.msa.fa"
 conda "hmmer"
-shell
+shell:
 '''   
 esl-reformat --informat stockholm -o !{msaFile}.msa.fa fasta !{msaFile}
 sleep 10 ##Helps with rare filesystem latency issues
