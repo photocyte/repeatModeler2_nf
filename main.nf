@@ -130,6 +130,7 @@ RepeatMasker -noint -pa ${task.cpus} -gff -q ${genome}
 }
 
 process convert_out_to_gff {
+executor 'local'
 // conda "repeatmodeler"
 input:
  path rm_out
@@ -143,6 +144,7 @@ rmOutToGFF3.pl !{rm_out} > tmp.gff
 }
 
 process tidy_to_gff3 {
+executor 'local'
 //storeDir "results"
 conda "genometools-genometools"
 input:
@@ -159,6 +161,7 @@ cat tmp.gff | grep -vP "^#" | gt gff3 -tidy -sort -retainids | uniq | gzip > !{g
 }
 
 process soft_mask {
+executor 'local'
 //storeDir "results"
 conda "bedtools seqkit"
 tag "${genome}"
@@ -176,6 +179,7 @@ sleep 10 ##Helps with rare filesystem latency issues
 }
 
 process rename_stockholm_record_ids {
+executor 'local'
 input:
  path msaFile
 output:
@@ -203,6 +207,7 @@ wf.close()
 }
 
 process convert_stockholm_to_fasta {
+executor 'local'
 publishDir "results", mode:"copy"
 input:
  path msaFile
