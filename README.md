@@ -11,7 +11,7 @@ If you have set the '--genome' parameter, and have access to [Miniconda](https:/
 See here for more background on the dfam/tetools container: [https://github.com/Dfam-consortium/TETools](https://github.com/Dfam-consortium/TETools)
 
 ### Running the pipeline
-`nextflow run repeatModeler.nf -resume --genome example.fa`
+`nextflow run main.nf -resume --genome example.fa`
 
 ### Results
  Look in `./results` once the pipeline is complete

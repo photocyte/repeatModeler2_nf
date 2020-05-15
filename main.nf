@@ -36,7 +36,7 @@ process RepeatModeler_BuildDatabase {
   shell
   '''
   ##From database  
-  THENAME=$(basename ${fasta})
+  THENAME=$(basename !{fasta})
   THENAME=${THENAME%.fasta}
   THENAME=${THENAME%.fa}
   THENAME=${THENAME%.fna}
