@@ -232,9 +232,9 @@ workflow modelAndMaskGenome_wf {
   rename_stockholm_record_ids(RepeatModeler_modelRepeatLibrary.out.repeat_msa_ch)
   convert_stockholm_to_fasta(rename_stockholm_record_ids.out.renamed_stockholm)
 
-  splitLibraryFasta(RepeatModeler_modelRepeatLibrary.out.repeat_library_ch)
-    
-  repeat_masker_tuples = cached_genome.combine(splitLibraryFasta.out)
+  splitLibraryFasta = RepeatModeler_modelRepeatLibrary.out.repeat_library_ch.splitFasta(size:20000)
+
+  repeat_masker_tuples = cached_genome.combine(splitLibraryFasta)
   RepeatMasker_parallel_exec(repeat_masker_tuples)
 
   RepeatMasker_simple_exec(cached_genome)
