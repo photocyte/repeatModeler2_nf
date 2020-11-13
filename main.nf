@@ -50,6 +50,7 @@ process RepeatModeler_BuildDatabase {
 }
 
 process RepeatModeler_modelRepeatLibrary {
+  publishDir "results", mode:"copy",overwrite:"true"
   //storeDir "results/RepeatModeler_out"
 //  stageInMode 'copy'
 //  memory '180 GB'
@@ -211,7 +212,7 @@ wf.close()
 
 process convert_stockholm_to_fasta {
 executor 'local'
-publishDir "results", mode:"copy"
+publishDir "results", mode:"copy",overwrite:"true"
 input:
  path msaFile
 output:
