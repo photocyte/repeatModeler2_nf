@@ -6,7 +6,7 @@ Dependencies:
 * Nextflow
 * Miniconda
 
-If you have set the '--genome' parameter, and have access to [Miniconda](https://docs.conda.io/en/latest/miniconda.html) & [Singularity](https://sylabs.io/singularity/), and given the path to your [tandem repeat finder](https://tandem.bu.edu/trf/trf.html) (TRF) executable under the 'runOptions' in nextflow.config, this pipeline should 'just work' and automatically pull the necessary [Docker containers](https://hub.docker.com/r/dfam/tetools) and install software via conda.
+If you have set the '--genome' parameter, and have access to [Miniconda](https://docs.conda.io/en/latest/miniconda.html) & [Singularity](https://sylabs.io/singularity/), this pipeline should 'just work' and automatically pull the necessary [Docker containers](https://hub.docker.com/r/dfam/tetools) and install software via conda.
 
 See here for more background on the dfam/tetools container: [https://github.com/Dfam-consortium/TETools](https://github.com/Dfam-consortium/TETools)
 

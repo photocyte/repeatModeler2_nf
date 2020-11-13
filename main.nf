@@ -1,4 +1,4 @@
-nextflow.preview.dsl=2
+nextflow.enable.dsl=2
 
 process checksum_input {
 executor 'local'
@@ -256,9 +256,7 @@ workflow {
 
  If you have set the --genome parameter, and
  have access to Miniconda / Singularity,
- and given the path to your tandem repeat 
- finder (TRF) executable under the 'runOptions' 
- in nextflow.config, this should just work.
+ this should just work.
 
  Intermediate results are stored in the
  'work' directory, in the current working dir
