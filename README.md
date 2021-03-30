@@ -13,6 +13,13 @@ See here for more background on the dfam/tetools container: [https://github.com/
 ### Running the pipeline
 `nextflow run main.nf -resume --genome example.fa`
 
+or
+
+```
+nextflow pull https://github.com/photocyte/repeatModeler2_nf
+nextflow run repeatModeler2_nf -resume --genome example.fa
+```
+
 ### Results
  Look in `./results` once the pipeline is complete
 
