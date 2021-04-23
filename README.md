@@ -20,7 +20,7 @@ or
 ```
 #Letting nextflow manage the git cloning
 nextflow pull https://github.com/photocyte/repeatModeler2_nf
-nextflow run repeatModeler2_nf -resume --genome example.fa
+nextflow run repeatModeler2_nf -latest -resume --genome example.fa
 ```
 
 ### Results
