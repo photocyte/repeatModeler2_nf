@@ -165,6 +165,7 @@ cat tmp.gff | grep -vP "^#" | gt gff3 -tidy -sort -retainids | uniq | gzip > !{g
 
 process soft_mask {
 executor 'local'
+publishDir "results", mode:"copy",overwrite:"true"
 //storeDir "results"
 conda "bedtools seqkit"
 tag "${genome}"
