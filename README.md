@@ -30,3 +30,7 @@ Flynn JM, Hubley R, Goubert C, Rosen J, Clark AG, Feschotte C, Smit AF. 2020. Re
 (Note, DAG rendering is a little broken currently)
 
 ![Directed acyclic graph for program execution](./results/dag.svg)
+
+### See also
+https://github.com/darcyabjones/pante
+
