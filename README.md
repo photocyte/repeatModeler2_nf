@@ -13,14 +13,14 @@ See here for more background on the dfam/tetools container: [https://github.com/
 ### Running the pipeline
 ```
 #After manually git cloning' the nextflow main.nf & nextflow.config into your working directory
-nextflow run main.nf -resume --genome example.fa`
+nextflow run main.nf -resume --cpuNum 2 --genome example.fa`
 ```
 or
 
 ```
 #Letting nextflow manage the git cloning
 nextflow pull https://github.com/photocyte/repeatModeler2_nf
-nextflow run repeatModeler2_nf -latest -resume --genome example.fa
+nextflow run repeatModeler2_nf -latest -resume --cpuNum 2 --genome example.fa
 ```
 
 ### Results
