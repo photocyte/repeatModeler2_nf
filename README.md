@@ -11,11 +11,14 @@ If you have set the '--genome' parameter, and have access to [Miniconda](https:/
 See here for more background on the dfam/tetools container: [https://github.com/Dfam-consortium/TETools](https://github.com/Dfam-consortium/TETools)
 
 ### Running the pipeline
-`nextflow run main.nf -resume --genome example.fa`
-
+```
+#After manually git cloning' the nextflow main.nf & nextflow.config into your working directory
+nextflow run main.nf -resume --genome example.fa`
+```
 or
 
 ```
+#Letting nextflow manage the git cloning
 nextflow pull https://github.com/photocyte/repeatModeler2_nf
 nextflow run repeatModeler2_nf -resume --genome example.fa
 ```
