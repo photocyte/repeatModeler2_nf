@@ -147,6 +147,7 @@ rmOutToGFF3.pl !{rm_out} > tmp.gff
 
 process tidy_to_gff3 {
 executor 'local'
+publishDir "results", mode:"copy",overwrite:"true"
 //storeDir "results"
 conda "genometools-genometools"
 input:
