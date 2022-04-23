@@ -3,7 +3,7 @@ nextflow.enable.dsl=2
 process checksum_input {
 executor 'local'
 conda 'seqkit openssl coreutils'
-publishDir "results",pattern:"input*.checksum.txt",mode:"copy",overwrite:"true"
+publishDir "results/${task.process}", pattern: "input*.checksum.txt", mode: 'link',overwrite:'true'
 input:
  path genome
 output:
@@ -26,7 +26,7 @@ echo "faschk:${FASCHK}__${f}" > input.${f}.checksum.txt
 
 process RepeatModeler_BuildDatabase {
   cache 'deep'
-  publishDir "results/db_dir"
+  publishDir "results/${task.process}", pattern: "input*.checksum.txt", mode: 'link',overwrite:'true'
   input:
      path fasta
   output:
@@ -50,7 +50,7 @@ process RepeatModeler_BuildDatabase {
 }
 
 process RepeatModeler_modelRepeatLibrary {
-  publishDir "results", mode:"copy",overwrite:"true"
+  publishDir "results/${task.process}", pattern: "input*.checksum.txt", mode: 'link',overwrite:'true'
   //storeDir "results/RepeatModeler_out"
 //  stageInMode 'copy'
 //  memory '180 GB'
@@ -147,7 +147,7 @@ rmOutToGFF3.pl !{rm_out} > tmp.gff
 
 process tidy_to_gff3 {
 executor 'local'
-publishDir "results", mode:"copy",overwrite:"true"
+publishDir "results/${task.process}", pattern: "input*.checksum.txt", mode: 'link',overwrite:'true'
 //storeDir "results"
 conda "genometools-genometools"
 input:
@@ -166,7 +166,7 @@ cat tmp.gff | grep -vP "^#" | gt gff3 -tidy -sort -retainids | uniq | gzip > !{g
 
 process soft_mask {
 executor 'local'
-publishDir "results", mode:"copy",overwrite:"true"
+publishDir "results/${task.process}", pattern: "input*.checksum.txt", mode: 'link',overwrite:'true'
 //storeDir "results"
 conda "bedtools seqkit"
 tag "${genome}"
@@ -214,7 +214,7 @@ wf.close()
 
 process convert_stockholm_to_fasta {
 executor 'local'
-publishDir "results", mode:"copy",overwrite:"true"
+publishDir "results/${task.process}", pattern: "input*.checksum.txt", mode: 'link',overwrite:'true'
 input:
  path msaFile
 output:
